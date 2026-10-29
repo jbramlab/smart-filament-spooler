@@ -1,0 +1,157 @@
+<title>Smart Spooler Flow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column, one diagram per section, workshop-drawing feel */
+:root {
+  --bg: #f6f7f5;
+  --panel: #ffffff;
+  --fg: #1d2420;
+  --muted: #5a645e;
+  --line: #d6dbd7;
+  --accent: #d2421f;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131715; --panel: #1b201d; --fg: #e6ebe7; --muted: #9aa59e; --line: #2e3531; --accent: #ff7a57;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131715; --panel: #1b201d; --fg: #e6ebe7; --muted: #9aa59e; --line: #2e3531; --accent: #ff7a57;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 56px;
+}
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.15; margin: 0; font-weight: 600; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 65ch; margin: 0; }
+section { display: grid; gap: 10px; }
+h2 { margin: 0; font-size: 20px; font-weight: 600; text-wrap: balance; }
+h2 span { font-family: var(--font-mono); color: var(--accent); font-weight: 500; margin-right: 8px; }
+section p { margin: 0; color: var(--muted); max-width: 65ch; }
+.diagram { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; overflow-x: auto; min-width: 0; }
+.diagram pre.mermaid { margin: 0; background: transparent; display: flex; justify-content: center; }
+.specs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.specs li { font-family: var(--font-mono); font-size: 13px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--fg); background: var(--panel); }
+footer { color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Individual Project · Smart Filament Spooler</div>
+    <h1>How the spooler works</h1>
+    <p class="lede">The filament path, the electronics, what happens during a run, and the tension control loop. The whole build stays under £100, including the later targets.</p>
+    <ul class="specs" aria-label="Key numbers">
+      <li>1.75 mm filament</li>
+      <li>PLA ≈ 2.86 g/m (label: 1 kg = 350 m)</li>
+      <li>3:1 printed gear</li>
+      <li>Splice pass &lt; 1.85 mm</li>
+      <li>≈ £98 UK retail</li>
+    </ul>
+  </header>
+
+  <section>
+    <h2><span>1</span>Filament path</h2>
+    <p>Filament runs left to right. Each stage has one job.</p>
+    <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  SRC["Source spool<br><small>hall sensor counts turns</small>"] --> BRK["Servo brake<br><small>sets back-tension, clamps on snap</small>"]
+  BRK --> RUN["Runout switch<br><small>detects end or snap</small>"]
+  RUN --> DAN["Dancer arm<br><small>angle = tension</small>"]
+  DAN --> WHL["Measuring wheel<br><small>AS5600 counts metres</small>"]
+  WHL --> SPL["Splicer<br><small>heated PTFE tube</small>"]
+  SPL --> TRV["Traverse guide<br><small>1.75 mm per spool turn</small>"]
+  TRV --> RCV["Receiving spool<br><small>NEMA 17 + 3:1 gear</small>"]
+</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2><span>2</span>Electronics</h2>
+    <p>The ESP32 reads every sensor and drives every actuator. The touchscreen is how people control it.</p>
+    <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  subgraph IN["Sensors"]
+    direction TB
+    S1["Runout microswitch"]
+    S2["Hall sensor on source spool"]
+    S3["Dancer arm potentiometer"]
+    S4["AS5600 measuring wheel"]
+    S5["Splicer thermistor"]
+    S6["Traverse endstop"]
+  end
+  subgraph OUT["Actuators"]
+    direction TB
+    A1["NEMA 17 via TMC2209<br><small>winding + stall detection</small>"]
+    A2["28BYJ-48 via ULN2003<br><small>traverse</small>"]
+    A3["Servo<br><small>tension brake</small>"]
+    A4["Heater + fan via MOSFET<br><small>splicer</small>"]
+  end
+  IN --> ESP["ESP32"]
+  ESP --> OUT
+  TS["2.8 inch touchscreen<br><small>LVGL UI</small>"] <--> ESP
+  PSU["12 V 5 A supply<br><small>+ 5 V converter</small>"] -.-> ESP
+</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2><span>3</span>What happens during a run</h2>
+    <p>The machine checks for slip, snaps and the end of the spool on every loop, and reacts on its own.</p>
+    <div class="diagram">
+<pre class="mermaid">
+flowchart TD
+  P(["Power on"]) --> M["Pick material on touchscreen<br><small>sets tension, grams per metre, splice temp</small>"]
+  M --> S["Spool setup<br><small>core size and width</small>"]
+  S --> T["Thread filament, press Start"]
+  T --> W["Winding<br><small>motor winds, traverse lays rows, PID holds tension</small>"]
+  W --> C{"Checks every loop"}
+  C -->|"All OK"| U["Update screen<br><small>metres, grams, metres left</small>"]
+  U --> W
+  C -->|"Motor and wheel disagree,<br>or stall detected"| SL["Pause, show Slip warning"]
+  SL --> RS["User fixes it, presses Resume"]
+  RS --> W
+  C -->|"Switch opens or<br>dancer goes slack"| Q{"Source spool<br>nearly empty?"}
+  Q -->|"No: snapped"| B["Stop motor, clamp brake<br><small>both spools held</small>"]
+  B --> SP["Splice wizard<br><small>cut square, insert, heat, cool</small>"]
+  SP --> CK{"Joint under 1.85 mm?"}
+  CK -->|"Yes"| W
+  CK -->|"No"| SP
+  Q -->|"Yes: end of spool"| E["Wind remaining distance<br>minus a few cm, then hold"]
+  E --> F["Prompt: clip end into flange hole"]
+  F --> D(["Done: total metres and grams"])
+</pre>
+    </div>
+  </section>
+
+  <section>
+    <h2><span>4</span>Tension control loop</h2>
+    <p>A feedback loop, the same idea as in Systems and Control. The target tension changes with the material picked.</p>
+    <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  SP["Target tension<br><small>from material</small>"] --> CMP(("compare"))
+  CMP -->|"error"| PID["PID controller<br><small>on ESP32</small>"]
+  PID --> SV["Servo brake force"]
+  SV --> TEN["Filament tension"]
+  TEN --> DA["Dancer arm angle<br><small>potentiometer</small>"]
+  DA -->|"measured tension"| CMP
+</pre>
+    </div>
+  </section>
+
+  <footer>Build order: core winder, then sensors, then touchscreen, then tension control, then splicer. After step 3 you already have a working smart spooler.</footer>
+</div>

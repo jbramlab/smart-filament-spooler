@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+# Fusion / MATLAB / Simulink working files
+*.f3d.bak
+slprj/
+*.slxc
+*.asv
+*.autosave
+# animation frames (rebuild with media/build_video.py)
+frames/
