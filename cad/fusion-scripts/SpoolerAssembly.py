@@ -22,6 +22,8 @@ REBUILD_ACTIVE = True   # rebuild inside the open spooler design (saves as a new
 # the motion study and drawing views on every other part are kept. Set to [] for a full rebuild.
 UPDATE_ONLY = ['Runout sensor', 'Splice point', 'FC01 holder', 'Electronics enclosure']
 REMOVE = ['Splicer (stretch goal)']
+# Set True to only reassign physical materials on the open spooler design (nothing is rebuilt).
+MATERIALS_ONLY = False
 FLIP_Y = True           # machine front (screen side) faces Fusion's FRONT view
 BED = 250.0             # printer bed limit (mm) - Bambu printers are 256 mm
 
@@ -53,7 +55,7 @@ def run(context):
         design = adsk.fusion.Design.cast(app.activeProduct)
         rebuilt = False
         partial = False
-        if REBUILD_ACTIVE and design:
+        if REBUILD_ACTIVE and design and not MATERIALS_ONLY:
             r0 = design.rootComponent
             names = [r0.occurrences.item(i).component.name for i in range(r0.occurrences.count)]
             if 'Frame' in names:
@@ -63,7 +65,7 @@ def run(context):
                         occ.deleteMe()
                 rebuilt = True
                 notes.append(('Updated only: ' + ', '.join(UPDATE_ONLY)) if partial else 'Rebuilt inside the open design')
-        if not rebuilt:
+        if not rebuilt and not MATERIALS_ONLY:
             app.documents.add(adsk.core.DocumentTypes.FusionDesignDocumentType)
             design = adsk.fusion.Design.cast(app.activeProduct)
         try:
@@ -265,7 +267,7 @@ def run(context):
             except Exception:
                 pass
 
-        def find(index, cands):
+        def find(index, cands, loose=True):
             keys = sorted(index)
             for c in cands:
                 if c.lower() in index:
@@ -274,6 +276,8 @@ def run(context):
                 for k in keys:
                     if k.startswith(c.lower()):
                         return index[k]
+            if not loose:                 # materials: never match on a fragment (e.g. 'pla' inside a copper name)
+                return None
             for c in cands:
                 for k in keys:
                     if c.lower() in k:
@@ -312,7 +316,7 @@ def run(context):
 
         looks, colour_fail = {}, []
         for key, (mc, ac, rgb) in LOOKS.items():
-            mat = find(mat_index, mc)
+            mat = find(mat_index, mc, loose=False)
             base = find(app_index, ac)
             appear = None
             if base:
@@ -326,6 +330,52 @@ def run(context):
                     except Exception:
                         appear = base
             looks[key] = (mat, appear)
+
+        if MATERIALS_ONLY:
+            fixed, keys_seen = 0, set()
+            for comp in design.allComponents:
+                for b in comp.bRepBodies:
+                    an = b.appearance.name if b.appearance else ''
+                    if not an.startswith('Spooler - '):
+                        continue
+                    key = an[len('Spooler - '):]
+                    keys_seen.add(key)
+                    mat = looks.get(key, (None, None))[0]
+                    if mat and (not b.material or b.material.name != mat.name):
+                        b.material = mat
+                        fixed += 1
+            # Bodies recoloured copper by the motion script also got a copper material: put the real one back.
+            comp_notes = []
+            def by_name(nm):
+                n = nm.lower()
+                if any(t in n for t in ('axle', 'shaft', 'lm8uu', 'bearing', 'rod', 'screw', 'pin')):
+                    return 'steel'
+                if 'filament' in n:
+                    return 'filament'
+                if 'potentiometer' in n or 'board' in n or 'pcb' in n:
+                    return 'pcb'
+                return 'moving'
+            for comp in design.allComponents:
+                for b in comp.bRepBodies:
+                    mn = b.material.name.lower() if b.material else ''
+                    if 'copper' in mn:
+                        key = by_name(b.name)
+                        mat = looks.get(key, (None, None))[0]
+                        if mat:
+                            b.material = mat
+                            comp_notes.append('%s / %s -> %s' % (comp.name, b.name, mat.name))
+            for comp in design.allComponents:
+                for b in comp.bRepBodies:
+                    n = b.name.lower()
+                    if any(t in n for t in ('mk8', 'magnet', 'nema')):
+                        mat = looks.get('steel', (None, None))[0]
+                        if mat and (not b.material or b.material.name != mat.name):
+                            b.material = mat
+                            comp_notes.append('%s / %s -> %s' % (comp.name, b.name, mat.name))
+            lines = ['Materials only: %d bodies reset to their look.' % fixed,
+                     'Copper bodies fixed: %d' % len(comp_notes)] + comp_notes[:30]
+            ui.messageBox('\n'.join(lines), 'SpoolerAssembly')
+            return
 
         def apply(body, key):
             mat, appear = looks.get(key, (None, None))
