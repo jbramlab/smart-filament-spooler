@@ -1,0 +1,8 @@
+Component,Part,Longest (mm),Middle (mm),Shortest (mm),Solid volume (cm3),Est. PLA (g)
+"Electronics enclosure","Enclosure",180,110,60,144.6,72
+"Electronics enclosure","Lid",180,110,3,58.3,29
+"FC01 holder","FC01 holder",119,88,28,58.9,29
+"Runout sensor","Runout housing",78,36,29,25.8,13
+"Runout sensor","Runout lid",36,24,2,2.1,1
+"Splice point","Clamp pad (TPU)",8,6,2,0.1,0
+"Splice point","Tail clamp",82,32,24,26.4,13

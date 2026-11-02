@@ -1,0 +1,56 @@
+Component,Part,Longest (mm),Middle (mm),Shortest (mm),Solid volume (cm3),Est. PLA (g)
+"Brake lever","Brake lever (4:1)",138,14,14,19.2,10
+"Brake lever","Brake pad (TPU)",20,12,6,1.4,1
+"Brake servo","Servo horn",6,6,3,0.1,0
+"Dancer arm","Dancer arm",82,12,4,2.5,1
+"Dancer arm","Dancer pulley",26,26,8,2.9,1
+"Dancer frame","Dancer mount",45,20,12,10.3,5
+"Dancer frame","Guide pulley 1",26,26,8,2.9,1
+"Dancer frame","Guide pulley 2",26,26,8,2.9,1
+"Dancer frame","Spring anchor",54,14,10,2.6,1
+"Drive pinion","Pinion 17T m1.5",28,28,8,3.8,2
+"Drive pinion","Pinion 17T m1.5 hub",18,18,4,0.9,0
+"Electronics enclosure","Enclosure",180,110,60,143.8,71
+"Electronics enclosure","Lid",180,110,3,58.3,29
+"Exit guide","Exit pulley",26,26,8,2.9,1
+"Frame","Brake pivot boss",28,12,12,2.3,1
+"Frame","Brake servo bracket",92,60,50,42.8,21
+"Frame","Hall sensor bracket",52,12,4,2.5,1
+"Frame","Motor bracket",96,56,44,31.2,15
+"Frame","Pulley bracket - exit",65,14,6,5.1,3
+"Frame","Pulley bracket - guide 1",65,14,6,5.1,3
+"Frame","Pulley bracket - guide 2",65,14,6,5.1,3
+"Frame","Stage beam 1 of 3",191,20,20,69.9,35
+"Frame","Stage beam 2 of 3",206,20,20,70.1,35
+"Frame","Stage beam 3 of 3",191,20,20,69.9,35
+"Frame","Stage post - left lower",180,50,40,82.9,41
+"Frame","Stage post - left upper",165,20,20,64.4,32
+"Frame","Stage post - right lower",180,50,40,82.9,41
+"Frame","Stage post - right upper",165,20,20,64.4,32
+"Frame","Traverse motor plate",47,42,3,4.6,2
+"Frame","Traverse tower - front lower",160,60,35,102.9,51
+"Frame","Traverse tower - front upper",145,40,15,83.9,42
+"Frame","Traverse tower - rear lower",160,60,35,102.9,51
+"Frame","Traverse tower - rear upper",145,59,15,85.8,43
+"Frame","Upright - receiving",220,100,67,353.7,175
+"Frame","Upright - source",220,100,67,353.7,175
+"Measuring wheel block","Idler arm",43,6,4,0.9,0
+"Measuring wheel block","Idler spring seat",8,8,4,0.3,0
+"Measuring wheel block","Wheel housing",68,40,34,76.0,38
+"Receiving spool rotor","Cone hub - back (fixed)",84,84,24,77.4,38
+"Receiving spool rotor","Cone hub - front (sliding)",84,84,24,77.4,38
+"Receiving spool rotor","Gear 68T m1.5",105,105,8,64.6,32
+"Receiving spool rotor","Gear 68T m1.5 hub",28,28,10,5.6,3
+"Receiving spool rotor","Thumb nut",40,40,14,15.9,8
+"Runout sensor","PTFE push fitting",8,7,7,0.3,0
+"Runout sensor","Runout mount",59,20,9,10.5,5
+"Source spool rotor","Brake drum",80,80,14,40.6,20
+"Source spool rotor","Cone hub - back (fixed)",84,84,24,77.4,38
+"Source spool rotor","Cone hub - front (sliding)",84,84,24,77.4,38
+"Source spool rotor","Thumb nut",40,40,14,15.9,8
+"Splicer (stretch goal)","PTFE standoffs",19,7,5,0.3,0
+"Splicer (stretch goal)","PTFE tube",66,4,4,0.6,0
+"Splicer (stretch goal)","Splicer housing",70,40,36,22.7,11
+"Splicer (stretch goal)","Splicer mount",50,20,2,2.0,1
+"Traverse carriage","Guide eye (PTFE)",32,4,4,0.3,0
+"Traverse carriage","Traverse carriage",50,48,30,33.7,17

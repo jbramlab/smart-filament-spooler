@@ -1,0 +1,33 @@
+1. Tail clamp (splice point)
+  Pad force to hold 5 N (no safety factor): N = T/(mu_TPU + mu_PLA) = 6.2 N
+  With a safety factor of 3: 19 N
+  M3 thumbscrew at 0.05 N.m finger torque: clamp force F = T/(K d) = 83 N, contact pressure 6.0 MPa
+  M3 thumbscrew at 0.15 N.m finger torque: clamp force F = T/(K d) = 250 N, contact pressure 17.9 MPa
+  Verdict: finger-tight already gives 4-12x the force needed; pressure is below PLA compressive yield (~60 MPa),
+  but over-tightening could flatten the filament, so the pad pocket depth should stop the screw (finger tight only).
+
+2. Runout lever drag
+  Lever force on filament <= 0.5 N; drag ~ mu_roll x F = 10 mN = 0.2% of the 5 N set tension. Negligible.
+
+3. Filament path lengths (from the CAD layout, mm)
+  Runout switch to tail clamp: 345 mm; clamp to receiving spool: 302 mm; runout to spool: 647 mm
+  Splice mode creep after the runout trips: about 321 mm (parks the tail mid-span)
+  A 2% error in the receiving-radius estimate gives +/-6 mm, well inside the 47 mm span
+
+4. Power budget without the splicer heater (12 V supply)
+  Winding motor ~0.69 A, traverse ~0.25 A, 5 V rail via buck 0.47 A typical / 1.80 A with servo stalled
+  Total from 12 V: 1.4 A typical, 2.7 A worst case (was about 6 A with the heater)
+  12 V 5 A supply margin: 1.8x worst case
+  Breaker: needs a DC rating and a trip current above ~3 A but at or below the 5 A supply: 4 A DC is the right size.
+  E-stop NC block: typical 10 A rating, carries < 1.5 A of driver current. OK.
+
+5. Cutting driver power at the e-stop
+  Back-EMF at 315 rpm: 5.5 V peak (below the 12 V rail, so no overvoltage on the TMC2209)
+  Back-EMF at 453 rpm: 7.9 V peak (below the 12 V rail, so no overvoltage on the TMC2209)
+  0.5 m/s: receiving side energy 0.10 J; if the source were locked, tension peak 47 N vs 120 N break load
+  1.13 m/s: receiving side energy 0.53 J; if the source were locked, tension peak 99 N vs 120 N break load
+  Brake (54 N pad, mu 0.5, 40 mm drum) slips at 11 N tension with the source at r = 100 mm, which caps the spike
+  Brake (54 N pad, mu 0.5, 40 mm drum) slips at 31 N tension with the source at r = 35 mm, which caps the spike
+  Verdict: safe at the 0.5 m/s working speed; at top speed the brake slip is what protects the filament.
+  Recommendation: wire a second e-stop contact (or sense the driver supply) to an ESP32 input so the firmware
+  also releases the brake and stops the loop when the e-stop is pressed.
